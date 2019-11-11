@@ -16,12 +16,12 @@ pipeline {
                 script {
                     app = docker.build("juanpab/train-schedule")
                     app.inside {
-                        sh echo $(curl localhost:8080)
+                        sh 'echo $(curl localhost:8080)'
                     }
                 }
             }
         }
-        stage('Push Docker Image'){
+        stage('Push Docker Image') {
             when {
                 branch 'master'
             }
@@ -34,15 +34,15 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Production'){
+        stage('Deploy to Production') {
             when {
                 branch 'master'
             }
-            steps{
+            steps {
                 input 'Deploy to Production?'
                 milestone(1)
                 withCredentials([usernamePassword(credentialsId: 'webserver_login', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
-                    script{
+                    script {
                         sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@prod_ip \"docker pull juanpab/train-schedule:${env.BUILD_NUMBER}\""
                         try {
                             sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@prod_ip \"docker stop train-schedule\""
